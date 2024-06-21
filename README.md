@@ -5,7 +5,7 @@
 [[Videos]](example.com)
 
 The code and this readme-file are modified from from [Diffusion policy](https://github.com/real-stanford/diffusion_policy).
-Our major contributions can be summarized (but is not limited to) as sensor intergration, actuator intergration, push-T scripting, and control configs.
+Our major contributions can be summarized as (but is not limited to) sensor intergration, actuator intergration, push-T scripting, and control configs.
 
 README v0: [Niilo Emil Isosomppi](example.com) 07.02.2024\
 README v1:
