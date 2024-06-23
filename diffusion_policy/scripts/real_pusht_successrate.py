@@ -15,11 +15,11 @@ import json
 
 @click.command()
 @click.option(
-    '--reference', '-r', required=True,
+    '--reference', '-r', default="demo/new_pusht/demo_pusht10/metrics_raw.json",
     help='Reference metrics_raw.json from demonstration dataset.'
 )
 @click.option(
-    '--input', '-i', required=True,
+    '--input', '-i', default="eval/new_pusht/pusht10",
     help='Data search path'
 )
 def main(reference, input):
@@ -43,12 +43,13 @@ def main(reference, input):
         metric_success_idxs = collections.defaultdict(list)
         metric_failure_idxs = collections.defaultdict(list)
         for episode_idx, metrics in this_metrics.items():
+            duration = metrics.pop("duration")
+            reached_end_zone = metrics.pop("reached_end_zone")
             for key, value in metrics.items():
                 last_value = value[-1]
                 # print(episode_idx, key, last_value)
                 demo_min = demo_min_metrics[key]
-                if last_value >= demo_min:
-                    # success
+                if (last_value >= demo_min) and reached_end_zone[0]:
                     metric_success_idxs[key].append(episode_idx)
                 else:
                     metric_failure_idxs[key].append(episode_idx)

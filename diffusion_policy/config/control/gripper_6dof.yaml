@@ -60,4 +60,4 @@ tcp_limits:
   alpha: [0, 0.50] #.4
   beta: [-6.38318530718, 0.1]
 
-use_rot: xyz #Valid: null, z, xyz  ---  indep. x,y rot not implementedy
+use_rot: xyz #Valid: null, z, xyz  ---  indep. x,y rot not implemented

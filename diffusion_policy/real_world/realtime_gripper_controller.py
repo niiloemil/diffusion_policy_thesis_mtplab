@@ -201,27 +201,13 @@ class GripperController(mp.Process):
 
             while keep_running:
                 # start control iteration
-                #t_start = rtde_c.initPeriod()
-                #print("NOW:",time.monotonic())
                 # send command to robot
                 t_now = time.monotonic()
-                #print("next:",t_now)
-
-                # diff = t_now - pose_interp.times[-1]
-                # if diff > 0:
-                #     print('extrapolate', diff)
-                #print(t_now)
-
                 pose_command = pose_interp(t_now)[0]
-                #print(f"pose_command_now: {pose_command}")
+                gripper.gotobool(pose_command)
+
                 t_next_loop = (t_start + (iter_idx+1)*dt)
 
-                vel = 0.5
-                acc = 0.5
-                #if prev_command != pose_command:
-                    #print("CHANGED POS")
-                #print(pose_command)
-                gripper.gotobool(pose_command)
                 #prev_command = pose_command #TODO use this somehow?
                 # update robot state
                 state = gripper.get_state()
@@ -250,26 +236,7 @@ class GripperController(mp.Process):
                         keep_running = False
                         # stop immediately, ignore later commands
                         break
-                    # elif cmd == Command.GOTO.value:
-                    #     # since curr_pose always lag behind curr_target_pose
-                    #     # if we start the next interpolation with curr_pose
-                    #     # the command robot receive will have discontinouity 
-                    #     # and cause jittery robot behavior.
-                    #     target_pose = command['target_pose']
-                    #     #duration = float(command['duration'])
-                    #     curr_time = t_now + dt
-                    #     t_insert = curr_time #+ duration
-                    #     pose_interp = pose_interp.drive_to_waypoint(
-                    #         pose=target_pose,
-                    #         time=t_insert
-                    #         #curr_time=curr_time
 
-                    #     )
-                    #     last_waypoint_time = t_insert
-                    #     if self.verbose:
-                    #         print("[GripperController] New pose target:{} duration:{}s".format(
-                    #             target_pose))
-                            
                     elif cmd == Command.SCHEDULE_WAYPOINT.value:
                         target_pose = command['target_pose']
                         target_time = float(command['target_time'])

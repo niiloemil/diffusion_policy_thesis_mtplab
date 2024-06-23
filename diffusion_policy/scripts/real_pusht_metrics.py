@@ -16,6 +16,7 @@ import numpy as np
 import threadpoolctl
 from matplotlib import pyplot as plt
 import json
+from ffprobe import FFProbe
 
 def get_t_mask(img, hsv_ranges=None, path=None):
     if hsv_ranges is None:
@@ -49,22 +50,27 @@ def get_t_mask(img, hsv_ranges=None, path=None):
         cv2.imwrite(write_path, vis)
     return mask
 
-def get_mask_metrics(target_mask, mask):
+def get_mask_metrics(target_mask, mask, task_time, task_timeout):
     # We can not assume that every pixel of T is correctly detected in "mask". This is due to frame size and detection validity in certain areas outside of target zone
     # Therefore, infer union from intersection by assuming T always has the same number of pixels
     total = np.sum(target_mask)
     i = np.sum(target_mask & mask)
     u = total+(total-i)
     #u = np.sum(target_mask | mask)
+    reached_end_zone=True
+    if task_time>=task_timeout:
+        reached_end_zone=False
     iou = i / u
     coverage = i / total
     result = {
         'iou': iou,
-        'coverage': coverage
+        'coverage': coverage,
+        'duration': task_time,
+        'reached_end_zone': reached_end_zone
     }
     return result
 
-def get_image_metrics(eval_image_path, target_mask):
+def get_image_metrics(eval_image_path, target_mask, task_timeout):
     threadpoolctl.threadpool_limits(1)
     cv2.setNumThreads(1)
     metrics = collections.defaultdict(list)
@@ -73,9 +79,16 @@ def get_image_metrics(eval_image_path, target_mask):
     x = img_shape[1]
     eval_image = eval_image[:,:(x//2)]
     path = eval_image_path
+
+    video_dir = os.path.dirname(eval_image_path)
+    video_path = os.path.join(video_dir,"0.mp4")
+    probe = FFProbe(video_path)
+    task_timestring = probe.metadata["Duration"]
+    h, m, s = task_timestring.split(':')
+    task_time = 3600*float(h)+60*float(m)+float(s)
     mask = get_t_mask(eval_image, path=path)
     metric = get_mask_metrics(
-        target_mask=target_mask, mask=mask)
+        target_mask=target_mask, mask=mask, task_time = task_time, task_timeout=task_timeout)
     for k, v in metric.items():
         metrics[k].append(v)
     return metrics
@@ -85,15 +98,16 @@ def worker(x):
 
 @click.command()
 @click.option(
-    '--reference', '-r', default="demo/demo_pusht10/perfect_eval.png", 
+    '--reference', '-r', default="eval/new_pusht/pusht10/perfect_eval.png", 
     help="Reference video whose last frame will define goal.")
 @click.option(
-    '--input', '-i', default = "demo/pusht10",
+    '--input', '-i', default = "eval/new_pusht/pusht10_ft",
     help='Dataset path to evaluate.')
+@click.option('--ep_timeout', '-to', default=60.0, type=float)
 @click.option('--n_workers', '-n', default=10, type=int)
 
 
-def main(reference, input, n_workers):
+def main(reference, input, ep_timeout, n_workers):
     # read last frame of the reference video to get target mask
     eval_array = cv2.imread(reference)
     array_shape = np.shape(eval_array)
@@ -119,7 +133,7 @@ def main(reference, input, n_workers):
     with mp.Pool(n_workers) as pool:
         args = list()
         for idx in episode_idxs:
-            args.append((episode_video_path_map[idx], target_mask))
+            args.append((episode_video_path_map[idx], target_mask, ep_timeout))
         results = pool.map(worker, args)
     episode_metric_map = dict()
     for idx, result in zip(episode_idxs, results):
