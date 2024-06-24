@@ -8,7 +8,7 @@ from multiprocessing.managers import SharedMemoryManager
 import numpy as np
 from diffusion_policy.shared_memory.shared_memory_queue import (SharedMemoryQueue, Empty)
 from diffusion_policy.shared_memory.shared_memory_ring_buffer import SharedMemoryRingBuffer
-from diffusion_policy.real_world.gripper_modbus_tcp import Gripper
+from diffusion_policy.real_world.gripper_api.gripper_modbus_tcp import Gripper
 from diffusion_policy.common.bool_state_interpolator import BoolStateInterpolator
 
 

@@ -1,5 +1,5 @@
 from diffusion_policy.real_world.base_real_env import BaseRealEnv
-from diffusion_policy.real_world.gripper_modbus_tcp import Gripper
+from diffusion_policy.real_world.gripper_api.gripper_modbus_tcp import Gripper
 import numpy as np
 import time
 import math

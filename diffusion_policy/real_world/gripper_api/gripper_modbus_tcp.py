@@ -1,6 +1,5 @@
-#Code modified from https://github.com/baha2r/robotiq3f_py
+#Code modified by Niilo Emil Isosomppi from https://github.com/baha2r/robotiq3f_py which is by Bahadur Beigomi
 
-#TODO finish writing this comment
 #See link below for gripper documentation. Manual is also archived in the project files. Robotiq UI (Windows) for testing the gripper and configuring its IP is also archived in the apppended project files.
 #Gripper: https://assets.robotiq.com/website-assets/support_documents/document/2F-85_2F-140_Instruction_Manual_e-Series_PDF_20190206.pdf
 #RUI : 
